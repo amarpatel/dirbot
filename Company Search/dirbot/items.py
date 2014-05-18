@@ -7,4 +7,3 @@ class Website(Item):
     company = Field()
     positionSalaryURL = Field()
     salaryCount = Field()
-    # avgSalary = Field()
