@@ -40,7 +40,7 @@ class DmozSpider(Spider):
             item['company'] = site.xpath('p/a/tt[@class="i-emp"]/text()').extract()
             item['position'] = site.xpath('p/a/strong/tt[@class="i-occ"]/text()').extract()
             item['positionSalaryURL'] = site.xpath('p/a/@href').extract()
-            # item['url'] = site.xpath('a/@href').extract()
+            item['salaryCount'] = site.xpath('p/tt[@class="notranslate"]/text()').extract()
             # item['url'] = site.xpath('a/@href').extract()
             # item['description'] = site.xpath('text()').re('-\s([^\n]*?)\\n')
             # item['description'] = site.xpath('text()').re('-\s([^\n]*?)\\n')
