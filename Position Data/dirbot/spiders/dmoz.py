@@ -21,55 +21,78 @@ class DmozSpider(Spider):
         @scrapes name
         """
         sel = Selector(response)
-        sites = sel.xpath('//table[@class="memberChart"]/tbody/tr[@class="dataRow"]')
+        sites = sel.xpath('//table[@class="memberChart"]/tbody')
+        # sites = sel.xpath('//table[@class="memberChart"]/tbody/tr[@class="dataRow"]')
         # sites = sel.xpath('//ul[@class="directory-url"]/li')
         items = []
 
         for site in sites:
             item = Website()
 
-        # Finds Total Avg Pay -- not working!!!!
-            # print site.xpath('td[@class="occ"]').extract()
+            # Finds Total Avg Pay -- works!
+            if site.xpath('tr[@class="dataRow titleRow first"]/td[@class="occ"]/p/strong/strong/text()').extract() == [u'Total Pay']:
+                item['avgTotalPay'] = site.xpath('tr[@class="dataRow titleRow first"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
 
             # Finds Avg Salary -- works!
-            if site.xpath('td[@class="occ"]/p/text()').extract()[0] == 'Salary (':
-                item['avgSalary'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+            if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p/text()').extract()[0] == 'Salary (':
+                item['avgSalary'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
 
             # Finds Bonus -- works!
-            if site.xpath('td[@class="occ"]/p/span[@class="toggle expanded"]/a/text()').extract() == [u'Bonuses']:
-                item['bonusTotal'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+            if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p/span[@class="toggle expanded"]/a/text()').extract() == [u'Bonuses']:
+                if site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/text()').extract() != [u'n/a']:
+                    item['bonusTotal'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                else:
+                    item['otherPay'] = 0
 
-            
-            # Finds Cash Bonus -- works!
-            if site.xpath('td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Cash Bonus (', u')']:
-                item['cashBonus'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
-            
-            # Finds Stock Bonus -- works!
-            if site.xpath('td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Stock Bonus (', u')']:
-                item['stockBonus'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
-            
-            # Finds Profit Sharing -- works!
-            if site.xpath('td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Profit Sharing (', u')']:
-                item['profitSharing'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
-            
+            # Finds Cash Bonus
+            print site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p[@class="indented"]/text()').extract() [0]
+            # if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Cash Bonus (', u')']:
+                # if site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/text()').extract() != [u'n/a']:
+                #     item['cashBonus'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                # else:
+                #     item['cashBonus'] = 0
 
-            # if site.xpath('td[@class="occ"]/p/span[@class="toggle expanded"]/a/text()').extract() == [u'Other Pay']:
-                # item['otherPay'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
-                # print: 'yup'
+            # Finds Stock Bonus
+            if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Stock Bonus (', u')']:
+                if site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/text()').extract() != [u'n/a']:
+                    item['stockBonus'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                else:
+                    item['stockBonus'] = 0
+            
+            # Finds Profit Sharing
+            if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Profit Sharing (', u')']:
+                if site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/text()').extract() != [u'n/a']:
+                    item['profitSharing'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                else:
+                    item['profitSharing'] = 0
 
-            # commissionsOnSales
-            # tips
-                
+            # Other Pay -- works!
+            if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p/span[@class="toggle expanded"]/a/text()').extract() == [u'Other Pay']:
+                if site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/text()').extract() != [u'n/a']:
+                    item['otherPay'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                else:
+                    item['otherPay'] = 0
+
+            # Commisions On Sales
+            if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Commissions on Sales (', u')']:
+                if site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/text()').extract() != [u'n/a']:
+                    item['commissionsOnSales'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                else:
+                    item['commissionsOnSales'] = 0
+                    
+            # Tips
+            if site.xpath('tr[@class="dataRow"]/td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Tips (', u')']:
+                if site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/text()').extract() != [u'n/a']:
+                    item['tips'] = site.xpath('tr[@class="dataRow"]/td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                else:
+                    item['tips'] = 0           
+
+
             items.append(item)
 
         return items
 
-    # if x < 0:
-    #      x = 0
-    #      print 'Negative changed to zero'
-    #  elif x == 0:
-    #      print 'Zero'
-    #  elif x == 1:
-    #      print 'Single'
-    #  else:
-    #      print 'More'
+
+
+
+
