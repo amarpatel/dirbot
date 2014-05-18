@@ -28,14 +28,48 @@ class DmozSpider(Spider):
         for site in sites:
             item = Website()
 
-            item['avgTotalPay'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
-            # item['avgTotalPay'] = site.xpath('td[@class="mean"]').extract()
-            # item['position'] = site.xpath('p/a/strong/tt[@class="i-occ"]/text()').extract()
-            # item['positionSalaryURL'] = site.xpath('p/a/@href').extract()
-            # item['url'] = site.xpath('a/@href').extract()
-            # item['url'] = site.xpath('a/@href').extract()
-            # item['description'] = site.xpath('text()').re('-\s([^\n]*?)\\n')
-            # item['description'] = site.xpath('text()').re('-\s([^\n]*?)\\n')
+        # Finds Total Avg Pay -- not working!!!!
+            # print site.xpath('td[@class="occ"]').extract()
+
+            # Finds Avg Salary -- works!
+            if site.xpath('td[@class="occ"]/p/text()').extract()[0] == 'Salary (':
+                item['avgSalary'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+
+            # Finds Bonus -- works!
+            if site.xpath('td[@class="occ"]/p/span[@class="toggle expanded"]/a/text()').extract() == [u'Bonuses']:
+                item['bonusTotal'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+
+            
+            # Finds Cash Bonus -- works!
+            if site.xpath('td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Cash Bonus (', u')']:
+                item['cashBonus'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+            
+            # Finds Stock Bonus -- works!
+            if site.xpath('td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Stock Bonus (', u')']:
+                item['stockBonus'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+            
+            # Finds Profit Sharing -- works!
+            if site.xpath('td[@class="occ"]/p[@class="indented"]/text()').extract() == [u'Profit Sharing (', u')']:
+                item['profitSharing'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+            
+
+            # if site.xpath('td[@class="occ"]/p/span[@class="toggle expanded"]/a/text()').extract() == [u'Other Pay']:
+                # item['otherPay'] = site.xpath('td[@class="mean"]/span[@class="minor"]/tt[@class="notranslate"]/text()').extract()
+                # print: 'yup'
+
+            # commissionsOnSales
+            # tips
+                
             items.append(item)
 
         return items
+
+    # if x < 0:
+    #      x = 0
+    #      print 'Negative changed to zero'
+    #  elif x == 0:
+    #      print 'Zero'
+    #  elif x == 1:
+    #      print 'Single'
+    #  else:
+    #      print 'More'
